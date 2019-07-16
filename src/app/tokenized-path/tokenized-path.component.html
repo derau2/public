@@ -1,1 +1,13 @@
-<p>tokenized-path works!</p>
+<div style="height: 100%; width: 100%;">
+    <td-code-editor
+                    #monaco
+                    style="height: 200px; width: 100%;"
+                    theme="vs" language="json"
+                    (ngModelChange)="updateCode($event)" 
+                    name="script"
+                    (editorInitialized)="onReady()"
+    >
+    </td-code-editor>
+  </div>
+  
+  

@@ -54,6 +54,31 @@ export class TokenizedPathComponent extends AbstractControl implements OnInit, O
     };
   }
 
+  
+  onReady() {
+    this.monaco = (window as any).monaco;
+    // hmm https://github.com/microsoft/monaco-editor/issues/967
+
+    this.monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
+      {
+          allowNonTsExtensions: true
+      });
+
+    /*
+     this.monacoLibs = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+       this.externalLibCode,
+       `inmemory://model/bos_features.d.ts`
+     );
+    */
+    this.registerCustomLanguage(this.editor);
+  }
+
+  ngOnDestroy(): void {
+    if (this.monacoLibs) {
+      this.monacoLibs.dispose()
+    }
+  }
+
   registerCustomLanguage(monacoEditor: any): void {
     let language: any = {
       id: 'BosTokensLanguage',
@@ -176,92 +201,7 @@ export class TokenizedPathComponent extends AbstractControl implements OnInit, O
     monacoEditor.registerLanguage(language);
     monacoEditor.theme = 'myCustomTheme';
     monacoEditor.language = 'BosTokensLanguage';
-    this.registerCompletionItemProvider(monacoEditor);
   }
-
-
-  registerCompletionItemProvider(editor: any) {
-    // Register a completion item provider for the new language
-    editor.languages.registerCompletionItemProvider('BosTokensLanguage', { 
-      provideCompletionItems: (model, position) => {
-        // triggerCharacters: ["."],
-        // find out if we are completing a property in the 'dependencies' object.
-        const textUntilPosition = model.getValueInRange({
-          startLineNumber: 1,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column
-        });
-        const match = textUntilPosition.match(
-          /"dependencies"\s*:\s*{\s*("[^"]*"\s*:\s*"[^"]*"\s*,\s*)*("[^"]*)?$/
-        );
-        var suggestions = [
-        {
-            label: 'foobar',
-            kind: this.monaco.languages.CompletionItemKind.Keyword,
-            insertText: '{{account-id}}',
-            insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, 
-        {
-          label: 'token.{{account-id}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: '{{account-id}}',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, {
-          label: 'token.{{account-name}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: '{{account-name}}',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, {
-          label: 'token.{{source-filename}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: 'testing(${1:condition})',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, {
-          label: 'token.{{begin-date}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: '{{begin-date}}',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, {
-          label: 'token.{{end-date}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: '{{end-date}}',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }, {
-          label: 'token.{{now}}',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: '{{now}}',
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        },
-        {
-          label: 'function.format()',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: "|format('string')",
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        },
-        {
-          label: 'function.replace("old", "new")',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: "|replace('old','new')",
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        },
-        {
-          label: 'function.lower()',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: "|lower()",
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        },
-        {
-          label: 'function.upper()',
-          kind: this.monaco.languages.CompletionItemKind.Keyword,
-          insertText: "upper()",
-          insertTextRules: this.monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-        }];
-        return { suggestions: suggestions };
-      }
-    });
-  }
-
 
 
   updateCode(e) {
@@ -269,27 +209,6 @@ export class TokenizedPathComponent extends AbstractControl implements OnInit, O
     this.codeUpdated.emit(e);
   }
 
-  onReady() {
-    this.monaco = (window as any).monaco;
-    // hmm https://github.com/microsoft/monaco-editor/issues/967
-
-    this.monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
-      {
-          allowNonTsExtensions: true
-      });
-
-     this.monacoLibs = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-       this.externalLibCode,
-       `inmemory://model/bos_features.d.ts`
-     );
-    this.registerCustomLanguage(this.editor);
-  }
-
-  ngOnDestroy(): void {
-    if (this.monacoLibs) {
-      this.monacoLibs.dispose()
-    }
-  }
 
   setValue(value: any, options?: Object) {
     this.code = value;
@@ -355,3 +274,4 @@ function pathValidatorFN(control: AbstractControl): { [key: string]: any } | nul
     return null;
   }
 }
+
