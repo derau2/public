@@ -11,7 +11,6 @@
   },
   "private": true,
   "dependencies": {
-    "@am/ag-grid": "2.4.0",
     "@angular-redux/store": "^9.0.0",
     "@angular/animations": "7.2.15",
     "@angular/common": "7.2.15",
